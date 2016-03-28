@@ -12,7 +12,7 @@ You need linux and the following:
 
 To compile your kernel
 ```sh
-git clone carlosacari/modularOS
+git clone https://github.com/carlosascari/modularOS.git
 cd modularOS/
 chmod +x setup.sh
 ./setup.sh
@@ -26,7 +26,7 @@ Furthermore, there is a visible difference in documentation for higher level pro
 > OS development is easy, practical OS development is hard..
 > lets not be practical ... maybe a little.
 
-[modularOS]() is a DIY OS framework focusing on clean and easy to digest, code and documentation. The kernel will be kept small in code size and complexity. Also, an api and pattern will be presented, so as to keep everyones contribution consistent.
+[modularOS](https://github.com/carlosascari/modularOS.git) is a DIY OS framework focusing on clean and easy to digest, code and documentation. The kernel will be kept small in code size and complexity. Also, an api and pattern will be presented, so as to keep everyones contribution consistent.
 
 ## Lets talk about the root directory
 
