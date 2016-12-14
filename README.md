@@ -10,12 +10,12 @@ You need linux and the following:
 	apt-get install grub
 	apt-get install qemu
 
-To compile your kernel
+To compile & emulate your kernel (found in Build/)
 ```sh
 git clone https://github.com/carlosascari/modularOS.git
 cd modularOS/
-chmod +x setup.sh
-./setup.sh
+chmod +x Start.sh
+./Start.sh
 ```
 
 I suddently felt like jumping into OS dev after watching [Julia Evans](
@@ -28,52 +28,30 @@ Furthermore, there is a visible difference in documentation for higher level pro
 
 [modularOS](https://github.com/carlosascari/modularOS.git) is a DIY OS framework focusing on clean and easy to digest, code and documentation. The kernel will be kept small in code size and complexity. Also, an api and pattern will be presented, so as to keep everyones contribution consistent.
 
-## Lets talk about the root directory
+### Overview
 
-	modularOS/
-		build.sh
-		iso/
-			...
-		lib/
-			kernel.asm
-			kernel.c
-			link.ld
-			modules/
-				...
-		modules/   		 <--- created after running build.sh
-			...
-
-**build.sh**
+**Start.sh**
 Bash script that compiles the kernel and creates a bootable ISO with grub, then emulates the bootable ISO with qemu. You should take a look.
 
-**iso/**
-This is where your bootable ISO will be created. The `modularOS/` folder contains your kernel and grub configuration. Anything inside the modularOS folder will be included in your ISO.
+**Build/**
+This is where your bootable ISO will be created.
 
-**lib/**
+**Source/**
 This is the source code folder for the modularOS kernel and kernel modules. Inside you will find:
 
-- **kernel.asm**
-The entry point for the kernel, it has to be in assembly since we have to write a [multiboot](http://www.gnu.org/software/grub/manual/multiboot/multiboot.html#OS-image-format) header, which grub uses to find your operating system's entry point. This module simply calls `kmain()`, found in `kernel.c`.
+- **Kernel.s**
+The entry point for the kernel, it has to be in assembly since we have to write a [multiboot](http://www.gnu.org/software/grub/manual/multiboot/multiboot.html#OS-image-format) header, which grub uses to find your operating system's entry point. This module simply calls `KernelMain()`, found in `Kernel.c`.
 It was written for NASM assembler.
 
-- **kernel.c**
+- **Kernel.c**
 This is your kernel. May the force be with you.
 
-- **link.ld**
+- **Linker.ld**
 This is a linker file that is used to specify the layout of the kernel code. Executable, Writeable and Read Only code is generally sectioned into their own chunks of data.
 This file will help you tweak how your binary (kernel.bin) will organize its raw data. You don't need to edit this file, and you should read up on linker scripts before fiddleling.
-**BTW** The kernel entry point, which is the `main` label (which is also the binary offset) found in `kernel.asm` is specified here, in case you want to change it. 
+**BTW** The kernel entry point, which is the `main` label (which is also the binary offset) found in `Kernel.s` is specified here, in case you want to change it. 
 
-**modules/**
-The kernel entry point, the kernel main, and the kernel modules are compiled into [relocatable object files](http://www.sco.com/developers/gabi/2001-04-24/ch4.intro.html), and this is where they are stored. 
-
-The linker later on glues these objects together to create the completed kernel binary. 
-
-Object files are neat, they are your raw CPU instructions sectioned and with a variable offset so that a linker can glue the code together and recalculate the offsets. 
-
-> In CPU talk: variables, functions and structures are all offsets.
-
-Its cool to understand, however for the most part you can ignore this folder.
+-----------------
 
 ## Lets talk about the kernel modules
 
@@ -183,22 +161,34 @@ This is unfortunate, since it leaks unexpected variables onto the global scope, 
 
 > Keep in mind that any module that gets compiled along your kernel, will have its module Object exposed globally.
 
-## API 
 
-Look at the header files in `lib/modules` directory, the module Object definition will tell you all the methods and properties avialable.
+-----------------
 
-# GOALS
+## Code Style
 
-1. I'd like to see a package manager very similar to `npm`, for installing third party kernel modules. I'll begin developing it as soon as I feel the patterns outlined here are reliable enough. [Ring 0](https://en.wikipedia.org/wiki/Protection_ring), is as dangerous as you can get as a developer, for your machine, a special consideration and architecture must be setup, before opening the gates of pandora. Even from inside of a **virtual machine** (like qemu), it is not safe to run third party code.
+> Object Oriented C, inspired by nodejs modules
 
-2. More core modules, grub catapults us into Protected Mode, access to all of you machines hardware should be possible and more importantly, hackable.
-We'll focus, for now on hard disk I/O, Screen I/O, Keyboard input and Mouse input. 
+- Filenames are upper CamelCase.
+- Modules are upper CamelCase.
+- Submodules (namespaces) are upper CamelCase
+- Module properties are lower camelCase 
+- Module methods are lower camelCase 
+- Types and Typedefs are upper CamelCase.
+- Constants are ALL_UPPER_CASE.
+- API functions are upper CamelCase
+- Static variables are upper CamelCase
+- Static methods are upper CamelCase
+- Global variables are upper CamelCase
+- Local variables are lower camelCase
 
-3. Async is here, lets write an Event Loop and implement it into our kernel, so we have that cupcake from the get-go.
+Modules are either:
+	- Class where multiple instances can be created
+	- Singleton that may initialize with a method named `initialize`
 
-4. I want to make it easier for you to develop your own Jarvis
-![Iron Man's Jarvis OS](http://s3.amazonaws.com/digitaltrends-uploads-prod/2013/12/jarvis.jpg "Jarvis OS ... its do-able.")
-I believe in you, Internet.
+The idea is to work in a low level enviroment using methodlogies usually found in higher level enviroments.
+A PrivateKernelMemory is reserved inside the kernel (~8Kb) to be used to instanciate modules that are classes.
+
+*See /Source/Modules for examples*
 
 ## Sources 
 
@@ -208,3 +198,4 @@ I believe in you, Internet.
 ## LICENSE 
 
 MIT
+
